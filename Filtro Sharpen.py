@@ -25,7 +25,7 @@ def dividir_imagem(imagem, num_threads):
         regioes.append((x_in, 0, x_fin, altura))
     return regioes
 
-def filtro_threads(imagem_caminho, num_threads, kernel):
+def filtro_threads(imagem_caminho, num_threads, kernel, nome_saida):
     try:
         imagem = Image.open(imagem_caminho).convert("RGB")
         regioes = dividir_imagem(imagem, num_threads)
@@ -40,10 +40,8 @@ def filtro_threads(imagem_caminho, num_threads, kernel):
         for thread in threads:
             thread.join()
 
-        nome_base, extensao = imagem_caminho.rsplit('.', 1)
-        imagem_filtrada = f"{nome_base}_sharpened.{extensao}"
-        imagem.save(imagem_filtrada)
-        print(f"Imagem com sharpening salva como {imagem_filtrada}")
+        imagem.save(nome_saida)
+        print(f"Imagem com sharpening salva como {nome_saida}")
 
     except FileNotFoundError:
         print(f"Erro: A imagem '{imagem_caminho}' não foi encontrada.")
@@ -53,4 +51,14 @@ def filtro_threads(imagem_caminho, num_threads, kernel):
 if __name__ == "__main__":
     imagem_caminho = "imagem.jpg"
     num_threads = 4
-    filtro_threads(imagem_caminho, num_threads, sharpen_kernel)
+    iteracoes = 5
+
+    imagem_atual = imagem_caminho
+
+    for i in range(1, iteracoes + 1):
+        nome_base, extensao = imagem_caminho.rsplit('.', 1)
+        nome_saida = f"{nome_base}_sharpened_{i}.{extensao}"
+
+        filtro_threads(imagem_atual, num_threads, sharpen_kernel, nome_saida)
+
+        imagem_atual = nome_saida
